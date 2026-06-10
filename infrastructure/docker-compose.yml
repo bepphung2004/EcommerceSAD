@@ -1,0 +1,174 @@
+version: '3.9'
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: nginx
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ../gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - gateway
+
+  gateway:
+    build: ../gateway
+    container_name: gateway
+    env_file:
+      - ../.env
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      - user-service
+      - product-service
+      - cart-service
+      - order-service
+      - payment-service
+      - shipping-service
+      - ai-service
+
+  frontend:
+    build: ../frontend
+    container_name: frontend
+    environment:
+      - VITE_API_BASE_URL=http://127.0.0.1:${NGINX_PORT:-80}/api
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - gateway
+
+  user-service:
+    build: ../user-service
+    container_name: user-service
+    env_file:
+      - ../.env
+    restart: on-failure
+    depends_on:
+      - user-db
+
+  product-service:
+    build: ../product-service
+    container_name: product-service
+    env_file:
+      - ../.env
+    depends_on:
+      - product-db
+
+  cart-service:
+    build: ../cart-service
+    container_name: cart-service
+    env_file:
+      - ../.env
+    restart: on-failure
+    depends_on:
+      - cart-db
+
+  order-service:
+    build: ../order-service
+    container_name: order-service
+    env_file:
+      - ../.env
+    restart: on-failure
+    depends_on:
+      - order-db
+
+  payment-service:
+    build: ../payment-service
+    container_name: payment-service
+    env_file:
+      - ../.env
+    restart: on-failure
+    depends_on:
+      - payment-db
+
+  shipping-service:
+    build: ../shipping-service
+    container_name: shipping-service
+    env_file:
+      - ../.env
+    restart: on-failure
+    depends_on:
+      - shipping-db
+
+  ai-service:
+    build: ../ai-service
+    container_name: ai-service
+    env_file:
+      - ../.env
+    depends_on:
+      - neo4j
+
+  neo4j:
+    image: neo4j:5.23
+    container_name: neo4j
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4j_password}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+
+  user-db:
+    image: mysql:8.0
+    container_name: user-db
+    environment:
+      MYSQL_DATABASE: ${USER_DB_NAME}
+      MYSQL_USER: ${USER_DB_USER}
+      MYSQL_PASSWORD: ${USER_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+
+  product-db:
+    image: postgres:16
+    container_name: product-db
+    environment:
+      POSTGRES_DB: ${PRODUCT_DB_NAME}
+      POSTGRES_USER: ${PRODUCT_DB_USER}
+      POSTGRES_PASSWORD: ${PRODUCT_DB_PASSWORD}
+    ports:
+      - "5433:5432"
+
+  cart-db:
+    image: mysql:8.0
+    container_name: cart-db
+    environment:
+      MYSQL_DATABASE: ${CART_DB_NAME}
+      MYSQL_USER: ${CART_DB_USER}
+      MYSQL_PASSWORD: ${CART_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3308:3306"
+
+  order-db:
+    image: mysql:8.0
+    container_name: order-db
+    environment:
+      MYSQL_DATABASE: ${ORDER_DB_NAME}
+      MYSQL_USER: ${ORDER_DB_USER}
+      MYSQL_PASSWORD: ${ORDER_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3309:3306"
+
+  payment-db:
+    image: mysql:8.0
+    container_name: payment-db
+    environment:
+      MYSQL_DATABASE: ${PAYMENT_DB_NAME}
+      MYSQL_USER: ${PAYMENT_DB_USER}
+      MYSQL_PASSWORD: ${PAYMENT_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3310:3306"
+
+  shipping-db:
+    image: mysql:8.0
+    container_name: shipping-db
+    environment:
+      MYSQL_DATABASE: ${SHIPPING_DB_NAME}
+      MYSQL_USER: ${SHIPPING_DB_USER}
+      MYSQL_PASSWORD: ${SHIPPING_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3311:3306"
