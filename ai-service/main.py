@@ -689,13 +689,34 @@ class HybridAIEngine:
 
         if not answer:
             context = self._infer_query_context(query)
-            intro = "Mình đã phân tích nhu cầu của bạn và gợi ý phù hợp nhất:"
-            lines = [f"- {p.name} ({p.category}) khoảng {p.price} USD" for p in picks[:3]]
-            if context["category"]:
-                lines.append(f"- Nhóm ưu tiên: {context['category']}")
-            if context["budget"] is not None:
-                lines.append(f"- Mức ngân sách tham chiếu: ~{round(context['budget'], 2)} USD")
-            answer = intro + "\n" + "\n".join(lines)
+            category_vn = {
+                "electronics": "Điện tử & Công nghệ",
+                "book": "Sách & Tri thức",
+                "fashion": "Thời trang & Phong cách"
+            }
+            cat_label = category_vn.get(context["category"], "sản phẩm tổng hợp")
+            budget_label = f" với mức ngân sách khoảng **{context['budget']} USD**" if context["budget"] is not None else ""
+            
+            intro = (
+                f"Chào bạn! Rất vui được hỗ trợ bạn tại **QuickMall AI**.\n\n"
+                f"Mình ghi nhận bạn đang tìm kiếm các **{cat_label}**{budget_label}.\n"
+                "Sau đây là các sản phẩm phù hợp nhất được trích xuất trực tiếp từ kho dữ liệu hệ thống (bao gồm gợi ý hành vi LSTM và biểu đồ tri thức Neo4j):\n"
+            )
+            
+            lines = []
+            for idx, p in enumerate(picks[:3], 1):
+                desc_text = p.description if p.description else "Không có mô tả chi tiết."
+                if len(desc_text) > 120:
+                    desc_text = desc_text[:117] + "..."
+                lines.append(
+                    f"**{idx}. {p.name}**\n"
+                    f"- **Danh mục:** {category_vn.get(p.category, p.category.capitalize())}\n"
+                    f"- **Giá:** **{p.price} USD**\n"
+                    f"- **Mô tả:** {desc_text}"
+                )
+            
+            outro = "\n\nHy vọng các sản phẩm trên sẽ đáp ứng tốt nhu cầu của bạn. Hãy click nút **Chi tiết** bên dưới để xem thêm thông tin và thêm vào giỏ hàng nhé! 👇"
+            answer = intro + "\n" + "\n\n".join(lines) + outro
 
         return {
             "query": query,
