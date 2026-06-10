@@ -268,8 +268,10 @@ function App() {
       });
       setChatAnswer(data.answer || "");
       setChatbotRecommendationIds(data.recommendations || []);
+      return data;
     } catch (err) {
       setMessage(err.message);
+      throw err;
     }
   }
 

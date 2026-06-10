@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductDetailModal from "../components/ProductDetailModal";
 import RecommendationRail from "../components/RecommendationRail";
@@ -33,6 +33,67 @@ function ShopPage({
   spotlightProduct,
 }) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatHistory, setChatHistory] = useState([
+    {
+      id: "welcome",
+      sender: "ai",
+      text: "Chào bạn! Mình là **QuickMall AI**. Mình có thể giúp bạn tìm kiếm laptop, sách, quần áo hoặc bất kỳ sản phẩm nào phù hợp với nhu cầu và ngân sách của bạn. Hãy thử nhập yêu cầu bên dưới nhé! 👇",
+      products: [],
+      timestamp: new Date()
+    }
+  ]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+
+  const handleAskChatbot = async (queryText) => {
+    if (!queryText.trim()) return;
+    
+    // Add user message
+    const userMsg = {
+      id: Date.now() + "-user",
+      sender: "user",
+      text: queryText,
+      timestamp: new Date()
+    };
+    setChatHistory(prev => [...prev, userMsg]);
+    setIsChatLoading(true);
+    
+    try {
+      const data = await onAskAI(queryText);
+      
+      const pMap = products.reduce((acc, p) => {
+        acc[p.id] = p;
+        return acc;
+      }, {});
+      
+      const recProducts = (data?.recommendations || [])
+        .map(id => pMap[id])
+        .filter(Boolean);
+
+      setChatHistory(prev => [
+        ...prev,
+        {
+          id: Date.now() + "-ai",
+          sender: "ai",
+          text: data?.answer || "Mình đã tìm được một số sản phẩm phù hợp ở bên dưới.",
+          products: recProducts,
+          timestamp: new Date()
+        }
+      ]);
+    } catch (err) {
+      setChatHistory(prev => [
+        ...prev,
+        {
+          id: Date.now() + "-error",
+          sender: "ai",
+          text: `Lỗi kết nối AI: ${err.message || "Không thể tải phản hồi từ máy chủ AI."}`,
+          products: [],
+          timestamp: new Date()
+        }
+      ]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
 
   const domainCount = {
     all: products.length,
@@ -212,15 +273,14 @@ function ShopPage({
               </button>
             </div>
             
-            {/* Chat Body hosting AIChatAssistant with customized scroll */}
-            <div className="flex-grow overflow-y-auto p-2 bg-gray-50">
+            {/* Chat Body hosting AIChatAssistant */}
+            <div className="flex-grow overflow-hidden bg-gray-50">
               <AIChatAssistant
-                defaultQuery=""
-                onAsk={onAskAI}
-                onReloadRecommend={onRefreshRecommend}
-                chatAnswer={chatAnswer}
-                suggestedProducts={chatbotRecommendations}
+                chatHistory={chatHistory}
+                onAsk={handleAskChatbot}
+                isLoading={isChatLoading}
                 onViewDetail={onViewDetail}
+                formatCurrency={formatCurrency}
               />
             </div>
           </div>
