@@ -699,8 +699,8 @@ class HybridAIEngine:
             
             intro = (
                 f"Chào bạn! Rất vui được hỗ trợ bạn tại **QuickMall AI**.\n\n"
-                f"Mình ghi nhận bạn đang tìm kiếm các **{cat_label}**{budget_label}.\n"
-                "Sau đây là các sản phẩm phù hợp nhất được trích xuất trực tiếp từ kho dữ liệu hệ thống (bao gồm gợi ý hành vi LSTM và biểu đồ tri thức Neo4j):\n"
+                f"Mình ghi nhận bạn đang quan tâm đến các sản phẩm **{cat_label}**{budget_label}.\n"
+                "Dưới đây là một số gợi ý phù hợp nhất từ cửa hàng dành cho bạn:\n"
             )
             
             lines = []
@@ -715,7 +715,7 @@ class HybridAIEngine:
                     f"- **Mô tả:** {desc_text}"
                 )
             
-            outro = "\n\nHy vọng các sản phẩm trên sẽ đáp ứng tốt nhu cầu của bạn. Hãy click nút **Chi tiết** bên dưới để xem thêm thông tin và thêm vào giỏ hàng nhé! 👇"
+            outro = "\n\nBạn có thể xem thêm chi tiết bằng cách nhấn vào nút **Chi tiết** ngay dưới sản phẩm tương ứng để tham khảo thêm hoặc thêm vào giỏ hàng nhé. Chúc bạn tìm được sản phẩm ưng ý! 😊"
             answer = intro + "\n" + "\n\n".join(lines) + outro
 
         return {
