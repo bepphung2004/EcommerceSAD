@@ -82,19 +82,31 @@ Tạo tệp `.env` tại thư mục gốc của dự án:
 - Trên Windows: Tạo file `.env` thủ công và sao chép nội dung từ `.env.example`. Điền khóa `GEMINI_API_KEY` nếu muốn sử dụng chatbot Gemini.
 
 ### 2. Khởi chạy toàn bộ hệ thống
-Sử dụng các script khởi chạy thông minh (đã được cấu hình tự động chờ cơ sở dữ liệu hoàn tất di cư `migrate` trước khi nạp dữ liệu mẫu):
 
-- **Trên Bash (Git Bash, WSL, Linux)**:
-  ```bash
-  chmod +x local-dev.sh
-  ./local-dev.sh up
-  ```
-- **Trên PowerShell**:
-  ```powershell
-  .\local-dev.ps1 up
-  ```
+- **Lần đầu khởi chạy (hoặc khi muốn rebuild và seed lại toàn bộ)**:
+  Sử dụng lệnh `up` để build lại các image, khởi động các container và nạp dữ liệu mẫu (`seed_data`):
+  - **Trên Bash (Git Bash, WSL, Linux)**:
+    ```bash
+    chmod +x local-dev.sh
+    ./local-dev.sh up
+    ```
+  - **Trên PowerShell**:
+    ```powershell
+    .\local-dev.ps1 up
+    ```
+  *Lưu ý: Lần đầu khởi chạy có thể mất vài phút để Docker tải xuống các base image và build.*
 
-*Lưu ý: Lần đầu khởi chạy có thể mất vài phút để Docker tải xuống các base image (Node, Python, MySQL, PostgreSQL, Neo4j) và build.*
+- **Các lần khởi chạy sau (Khởi động nhanh trong 1-2 giây, giữ nguyên dữ liệu test)**:
+  Nếu bạn đã tắt dự án bằng lệnh `stop` và muốn khởi động lại nhanh mà không cần build hay nạp lại dữ liệu:
+  - **Tắt hệ thống tạm thời (giữ dữ liệu)**:
+    - Bash: `./local-dev.sh stop`
+    - PowerShell: `.\local-dev.ps1 stop`
+  - **Khởi động nhanh trở lại (chỉ mất 1 giây)**:
+    - Bash: `./local-dev.sh start`
+    - PowerShell: `.\local-dev.ps1 start`
+  - **Tắt hệ thống và xóa sạch tài nguyên/dữ liệu**:
+    - Bash: `./local-dev.sh down`
+    - PowerShell: `.\local-dev.ps1 down`
 
 ### 3. Địa chỉ truy cập
 - **Cổng vào Nginx (UI + API - Khuyên dùng)**: [http://localhost](http://localhost)

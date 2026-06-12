@@ -1,5 +1,5 @@
 param(
-  [ValidateSet("up", "seed", "down", "logs", "ps", "restart")]
+  [ValidateSet("up", "seed", "down", "logs", "ps", "restart", "start", "stop")]
   [string]$Action = "up"
 )
 
@@ -78,6 +78,14 @@ switch ($Action) {
   "up" { Up-All }
   "seed" { Seed-Data }
   "down" { docker compose --env-file $EnvFile -f $ComposeFile down }
+  "start" { 
+    docker compose --env-file $EnvFile -f $ComposeFile start
+    Write-Host "Services started successfully."
+  }
+  "stop" { 
+    docker compose --env-file $EnvFile -f $ComposeFile stop
+    Write-Host "Services stopped successfully."
+  }
   "logs" { docker compose --env-file $EnvFile -f $ComposeFile logs -f }
   "ps" { docker compose --env-file $EnvFile -f $ComposeFile ps }
   "restart" {

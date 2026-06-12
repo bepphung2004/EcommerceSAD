@@ -55,7 +55,7 @@ up_all() {
 }
 
 show_help() {
-  echo "Usage: ./local-dev.sh [up|seed|down|logs|ps|restart]"
+  echo "Usage: ./local-dev.sh [up|seed|down|logs|ps|restart|start|stop]"
 }
 
 ACTION="${1:-up}"
@@ -69,6 +69,14 @@ case "$ACTION" in
     ;;
   down)
     docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" down
+    ;;
+  start)
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" start
+    echo "Services started successfully."
+    ;;
+  stop)
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" stop
+    echo "Services stopped successfully."
     ;;
   logs)
     docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" logs -f
