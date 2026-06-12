@@ -86,11 +86,11 @@ Dịch vụ kết nối tới cơ sở dữ liệu MySQL (`cart-db`) chạy cổ
 
 ## 7. Danh sách API Endpoints (API Routes)
 
-| Method | Endpoint | Quyền truy cập | Body / Payload | Response chính |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/` (Xem giỏ hàng) | JWT (IsAuthenticated) | Không có | `{"id", "user_id", "items": [{"id", "product_id", "quantity"}]}` |
-| `POST` | `/add` (Thêm vào giỏ) | JWT (IsAuthenticated) | `{"product_id", "quantity"}` | `{"detail": "item added"}` |
-| `DELETE` | `/remove` (Xóa khỏi giỏ) | JWT (IsAuthenticated) | `{"product_id"}` | `{"detail": "item removed"}` |
+| Method   | Endpoint                 | Quyền truy cập        | Body / Payload               | Response chính                                                   |
+| :---------| :-------------------------| :----------------------| :-----------------------------| :-----------------------------------------------------------------|
+| `GET`    | `/` (Xem giỏ hàng)       | JWT (IsAuthenticated) | Không có                     | `{"id", "user_id", "items": [{"id", "product_id", "quantity"}]}` |
+| `POST`   | `/add` (Thêm vào giỏ)    | JWT (IsAuthenticated) | `{"product_id", "quantity"}` | `{"detail": "item added"}`                                       |
+| `DELETE` | `/remove` (Xóa khỏi giỏ) | JWT (IsAuthenticated) | `{"product_id"}`             | `{"detail": "item removed"}`                                     |
 
 ---
 

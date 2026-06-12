@@ -13,16 +13,19 @@ ensure_env() {
 }
 
 wait_gateway() {
-  echo "Waiting for nginx health check..."
+  echo "Waiting for backend services to be fully initialized..."
   for i in {1..90}; do
-    if curl -fsS "http://localhost:${NGINX_PORT}/healthz" >/dev/null 2>&1; then
-      echo "Nginx is ready."
+    STATUS_PROD=$(curl -o /dev/null -s -w "%{http_code}" "http://localhost:${NGINX_PORT}/api/products/")
+    STATUS_USER=$(curl -o /dev/null -s -w "%{http_code}" "http://localhost:${NGINX_PORT}/api/users/")
+    
+    if [ "$STATUS_PROD" -eq 200 ] && { [ "$STATUS_USER" -eq 401 ] || [ "$STATUS_USER" -eq 403 ]; }; then
+      echo "All database migrations completed and services are ready."
       return 0
     fi
-    echo "Nginx not ready yet ($i/90)"
+    echo "Waiting for databases and migrations ($i/90)..."
     sleep 2
   done
-  echo "Nginx health check timed out."
+  echo "Services readiness check timed out."
   return 1
 }
 

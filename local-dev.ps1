@@ -15,20 +15,38 @@ function Ensure-EnvFile {
 }
 
 function Wait-Gateway {
-  Write-Host "Waiting for nginx health check..."
+  Write-Host "Waiting for backend services to be fully initialized..."
   for ($i = 1; $i -le 90; $i++) {
+    $prodStatus = 0
+    $userStatus = 0
+    
     try {
-      $res = Invoke-WebRequest -Uri "http://localhost:$NginxPort/healthz" -UseBasicParsing -TimeoutSec 2
-      if ($res.StatusCode -eq 200) {
-        Write-Host "Nginx is ready."
-        return
-      }
+      $prodRes = Invoke-WebRequest -Uri "http://localhost:$NginxPort/api/products/" -UseBasicParsing -TimeoutSec 2
+      $prodStatus = $prodRes.StatusCode
     } catch {
-      Write-Host "Nginx not ready yet ($i/90)"
+      if ($_.Exception.Response) {
+        $prodStatus = [int]$_.Exception.Response.StatusCode
+      }
     }
+    
+    try {
+      $userRes = Invoke-WebRequest -Uri "http://localhost:$NginxPort/api/users/" -UseBasicParsing -TimeoutSec 2
+      $userStatus = $userRes.StatusCode
+    } catch {
+      if ($_.Exception.Response) {
+        $userStatus = [int]$_.Exception.Response.StatusCode
+      }
+    }
+    
+    if ($prodStatus -eq 200 -and ($userStatus -eq 401 -or $userStatus -eq 403)) {
+      Write-Host "All database migrations completed and services are ready."
+      return
+    }
+    
+    Write-Host "Waiting for databases and migrations ($i/90)..."
     Start-Sleep -Seconds 2
   }
-  throw "Nginx health check timed out."
+  throw "Services readiness check timed out."
 }
 
 function Seed-Data {
